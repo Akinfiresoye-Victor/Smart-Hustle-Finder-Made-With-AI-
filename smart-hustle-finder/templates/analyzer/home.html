@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="hero animated-hero">
+    <div class="container hero-container">
+        <div class="hero-content">
+            <h1>Discover Your <span class="highlight">Market Value</span></h1>
+            <p class="subtitle">AI-powered insights to help you find the most in-demand tech skills and fill your gaps.</p>
+            
+            <div class="card form-card">
+                <form action="{% url 'analyze' %}" method="POST" id="search-form">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="skill">Primary Skill</label>
+                        <input type="text" id="skill" name="skill" placeholder="e.g. Python, React" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="skill_two">Compare with another skill (optional)</label>
+                        <input type="text" id="skill_two" name="skill_two" placeholder="e.g. JavaScript, Flask">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Analyze Market Demand</button>
+                </form>
+            </div>
+        </div>
+
+        <aside class="trending-sidebar">
+            <h3 class="sidebar-title">Trending This Week</h3>
+            <div class="trending-pills">
+                <button class="pill" onclick="triggerSearch('Python')">Python</button>
+                <button class="pill" onclick="triggerSearch('Django')">Django</button>
+                <button class="pill" onclick="triggerSearch('React')">React</button>
+                <button class="pill" onclick="triggerSearch('Machine Learning')">Machine Learning</button>
+                <button class="pill" onclick="triggerSearch('SQL')">SQL</button>
+                <button class="pill" onclick="triggerSearch('Docker')">Docker</button>
+            </div>
+        </aside>
+    </div>
+</section>
+
+<section class="features">
+    <div class="container grid">
+        <div class="feature-card">
+            <div class="icon">🚀</div>
+            <h3>Real-time Analysis</h3>
+            <p>We simulate live job market data to give you the most current trends.</p>
+        </div>
+        <div class="feature-card">
+            <div class="icon">🤖</div>
+            <h3>AI-Driven Insights</h3>
+            <p>Our AI analyzes job descriptions to find hidden requirements.</p>
+        </div>
+        <div class="feature-card">
+            <div class="icon">📊</div>
+            <h3>Comparison Mode</h3>
+            <p>Compare two skills side-by-side to find the higher market winner.</p>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function triggerSearch(skill) {
+        const skillInput = document.getElementById('skill');
+        const skillTwoInput = document.getElementById('skill_two');
+        const form = document.getElementById('search-form');
+        
+        skillInput.value = skill;
+        skillTwoInput.value = ''; // Clear comparison for trending clicks
+        form.submit();
+    }
+</script>
+{% endblock %}

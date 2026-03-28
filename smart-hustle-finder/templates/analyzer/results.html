@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="results-container container">
+    <div class="results-main">
+        {% if mode == 'comparison' %}
+        <!-- Comparison Mode -->
+        <section class="comparison-header">
+            <h1>Skill Comparison: <span class="highlight">{{ skill_one.name }}</span> vs <span class="highlight">{{ skill_two.name }}</span></h1>
+            <div class="winner-badge">
+                {% if comparison.winner == 'Tie' %}
+                <span class="badge badge-medium">{{ comparison.summary }}</span>
+                {% else %}
+                <span class="badge badge-high">Market Winner: {{ comparison.winner }}</span>
+                <p class="winner-summary">{{ comparison.summary }}</p>
+                {% endif %}
+            </div>
+        </section>
+
+        <div class="grid-2 comparison-grid">
+            <div class="skill-column">
+                <h2 class="column-title">{{ skill_one.name }} (Avg Score: {{ skill_one.avg_score }})</h2>
+                {% include 'analyzer/partials/skill_details.html' with skill_data=skill_one.analysis %}
+            </div>
+            <div class="skill-column">
+                <h2 class="column-title">{{ skill_two.name }} (Avg Score: {{ skill_two.avg_score }})</h2>
+                {% include 'analyzer/partials/skill_details.html' with skill_data=skill_two.analysis %}
+            </div>
+        </div>
+        {% else %}
+        <!-- Single Skill Mode -->
+        <section class="results-header">
+            <h1>Market Analysis for <span class="highlight">{{ skill }}</span></h1>
+            <p class="subtitle">{{ market_summary }}</p>
+        </section>
+
+        <section class="analysis-sections">
+            <!-- Top Skills -->
+            <div class="section-group">
+                <h2 class="section-title">Top In-Demand <span class="highlight">Skills</span></h2>
+                <div class="skill-grid">
+                    {% for item in top_skills %}
+                    <div class="card skill-card hover-glow">
+                        <div class="card-header">
+                            <h3>{{ item.skill }}</h3>
+                            <span class="badge badge-{{ item.demand_level | lower }}">{{ item.demand_level }}</span>
+                        </div>
+                        
+                        <!-- Demand Score Bar -->
+                        <div class="demand-bar-container">
+                            <div class="demand-bar-label">Demand Score: {{ item.demand_score }}/100</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill fill-{{ item.demand_level | lower }}" style="width: {{ item.demand_score }}%;"></div>
+                            </div>
+                        </div>
+
+                        <p class="description">{{ item.explanation }}</p>
+                        <div class="job-titles">
+                            <strong>Roles:</strong> {{ item.job_titles | join:", " }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Job Previews -->
+            <div class="section-group">
+                <h2 class="section-title">Sample Job <span class="highlight">Listings</span></h2>
+                <div class="job-preview-grid">
+                    {% for job in job_listings %}
+                    <div class="card job-card hover-glow">
+                        <div class="job-header">
+                            <span class="job-salary">{{ job.salary_range }}</span>
+                            <h3>{{ job.title }}</h3>
+                            <p class="company">{{ job.company }} &bull; {{ job.location }}</p>
+                        </div>
+                        <div class="job-tags">
+                            {% for tag in job.required_skills %}
+                            <span class="tag">{{ tag }}</span>
+                            {% endfor %}
+                        </div>
+                        <button class="btn btn-secondary btn-small">View Job</button>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Skill Gaps -->
+            <div class="section-group">
+                <h2 class="section-title">Skill Gap <span class="highlight">Analyzer</span></h2>
+                <div class="gap-grid">
+                    {% for gap in skill_gaps %}
+                    <div class="card gap-card hover-glow">
+                        <h3>{{ gap.missing_skill }}</h3>
+                        <p><strong>Why:</strong> {{ gap.why_needed }}</p>
+                        <p class="how"><strong>Path:</strong> {{ gap.how_to_learn }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Learning Roadmap -->
+            <div class="section-group">
+                <h2 class="section-title">Your Learning <span class="highlight">Roadmap</span></h2>
+                <div class="roadmap-timeline">
+                    {% for item in roadmap %}
+                    <div class="roadmap-skill-group">
+                        <h3 class="roadmap-skill-title">Path to master {{ item.skill }}</h3>
+                        <div class="timeline">
+                            {% for step in item.steps %}
+                            <div class="timeline-item">
+                                <div class="timeline-dot">{{ step.step }}</div>
+                                <div class="timeline-content">
+                                    <h4>{{ step.action }}</h4>
+                                    <div class="timeline-meta">
+                                        <span>⏱️ {{ step.time }}</span>
+                                        <span>📚 Resource: {{ step.resource }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+        {% endif %}
+
+        <div class="actions share-actions">
+            <button id="copy-summary" class="btn btn-primary">Copy Results Summary</button>
+            <a href="{% url 'home' %}" class="btn btn-secondary">New Analysis</a>
+        </div>
+    </div>
+
+    <!-- Trending Sidebar desktop only via CSS -->
+    <aside class="sidebar desktop-sidebar">
+        <h3 class="sidebar-title">Trending This Week</h3>
+        <div class="trending-pills">
+            <a href="javascript:void(0)" onclick="triggerSearch('Python')" class="pill">Python</a>
+            <a href="javascript:void(0)" onclick="triggerSearch('Django')" class="pill">Django</a>
+            <a href="javascript:void(0)" onclick="triggerSearch('React')" class="pill">React</a>
+            <a href="javascript:void(0)" onclick="triggerSearch('Machine Learning')" class="pill">Machine Learning</a>
+            <a href="javascript:void(0)" onclick="triggerSearch('SQL')" class="pill">SQL</a>
+            <a href="javascript:void(0)" onclick="triggerSearch('Docker')" class="pill">Docker</a>
+        </div>
+    </aside>
+</div>
+
+<!-- Helper for comparison to trigger search -->
+<form id="sidebar-form" action="{% url 'analyze' %}" method="POST" style="display:none;">
+    {% csrf_token %}
+    <input type="hidden" name="skill" id="sidebar-skill">
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function triggerSearch(skill) {
+        document.getElementById('sidebar-skill').value = skill;
+        document.getElementById('sidebar-form').submit();
+    }
+
+    document.getElementById('copy-summary').addEventListener('click', function() {
+        let text = "";
+        {% if mode == 'single' %}
+        text = "Market Analysis for {{ skill }}\n\n";
+        text += "Top 3 Skills:\n";
+        {% for item in top_skills|slice:":3" %}
+        text += "- {{ item.skill }} ({{ item.demand_level }} Demand)\n";
+        {% endfor %}
+        text += "\nSkill Gaps: {{ skill_gaps|length }} identified\n";
+        text += "Summary: {{ market_summary }}";
+        {% else %}
+        text = "Comparison: {{ skill_one.name }} vs {{ skill_two.name }}\n\n";
+        text += "Winner: {{ comparison.winner }}\n";
+        text += "{{ comparison.summary }}";
+        {% endif %}
+
+        navigator.clipboard.writeText(text).then(() => {
+            alert('Summary copied to clipboard!');
+        });
+    });
+</script>
+{% endblock %}

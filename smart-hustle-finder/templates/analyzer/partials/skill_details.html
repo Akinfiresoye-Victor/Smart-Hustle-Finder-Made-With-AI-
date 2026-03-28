@@ -1,0 +1,33 @@
+{% for item in skill_data.top_skills %}
+<div class="card skill-card hover-glow">
+    <div class="card-header">
+        <h3>{{ item.skill }}</h3>
+        <span class="badge badge-{{ item.demand_level | lower }}">{{ item.demand_level }}</span>
+    </div>
+    
+    <!-- Demand Score Bar -->
+    <div class="demand-bar-container">
+        <div class="demand-bar-label">Demand Score: {{ item.demand_score }}/100</div>
+        <div class="progress-bar">
+            <div class="progress-fill fill-{{ item.demand_level | lower }}" style="width: {{ item.demand_score }}%;"></div>
+        </div>
+    </div>
+
+    <p class="description">{{ item.explanation }}</p>
+    <div class="job-titles">
+        <strong>Roles:</strong> {{ item.job_titles | join:", " }}
+    </div>
+</div>
+{% endfor %}
+
+<div class="section-group">
+    <h3>Skill Gaps</h3>
+    <div class="gap-grid">
+        {% for gap in skill_data.skill_gaps %}
+        <div class="card gap-card hover-glow">
+            <h4>{{ gap.missing_skill }}</h4>
+            <p>{{ gap.why_needed }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
